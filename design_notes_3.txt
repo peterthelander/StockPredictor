@@ -1,0 +1,16 @@
+Final Result for Friday 9-May                                                      
+        OSH        Predicted gain, but actual loss 0.5% - bad (at the end of the day, actual slight gain - still, not much, so should have seen it was not good)
+        NWS        Predicted loss, and actual loss 1.1% - good                                        
+                        => refinement                                
+                                NWS loss was good because previous day was big up, so plenty of room to move down                        
+                                OSH should have gained but really lost slightly                        
+                                        because previous day was already big gain, so had to move down to recover
+                        => need to take in to account previous day move                
+                Make model mapping from input to output, WHERE                        
+                        input is 1 * us(last night - 1) + 2 * us(last night)                
+                        output is 1 * asx(yesterday) + 2 * asx(today)                
+                        so predicting the weighted average of yesterday and today                
+                                AND yesterday is known already        
+                        SO for example if prediction of +1%                
+                                AND yesterday asx move is +2%        
+                                THEN today prediction is 0        

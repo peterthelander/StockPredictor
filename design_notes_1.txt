@@ -1,0 +1,23 @@
+0. look at the B-values produced, to confirm:
+        - none are wildly large, eg > 2.0 - confirmed
+        - expect to see most values quite small, eg fabs(v) < 0.001 - confirmed
+        - expect to see at least a few values not small, eg 0.1 < fabs(v) < 1 - confirmed
+1. confirm the inverse matrix is good, using multiply to produce the identity matrix
+2. re-task all the data to begin on 1994-Jul-01 or whenever the indices start
+        - confirm the B-values are still not good, by criteria above
+3. check the models, by comparing:
+        - the RMS of the asxStock - expect about 1% or so
+        - the RMS of the (asxStock - predicted) - expect (hope) for alot less than RMS of the stock
+4. calculate the stock-model correlations
+5. set up the updater, and update the data from yahoo finance
+6. run a simulation:
+        use data from 1994-07-01..1999-12-31 as historical
+        simulate from 2000-01-01..present - determine worst / avg / best return
+7. set up to generate value for each day in the morning, and then watch the value (www.asx.com.au)
+
+optional: maybe cut down on the number of predictors, to increase speed
+        eliminate ones that have consistently small B-values
+
+8. get account with www.cmcmarkets.com.au to trade using highly-leveraged CFDs
+9. probably get the list of most-commonly-traded stocks, so then just select between those
+        because those should have lower margin costs

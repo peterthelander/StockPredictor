@@ -1,0 +1,38 @@
+Change in strategy:
+
+Predict the asx sector indices, because they are commission-free on cmc markets.
+
+Commissions are important: eg
+Using 100k principal
+Setting up 9 positions of 5k margin each, at 20:1 so 100k market value each, 900k market value total.
+Commission is 0.1% on each trade direction buy and sell, so that's 900000 * 0.1/100 * 2 = 1800 in commissions alone.
+Possibly expecting (ideal case) to get +5k on the day, so commissions cut out more than one third of the profit.
+
+NOTE: If turnover per month is > 2m (and it will be) then commision per trade is 0.06%
+        => 540 per day of the above example
+        => not too bad
+
+
+ASX Indices (historical data):
+        http://au.finance.yahoo.com/indices?e=asx_gic
+
+Also, should get all available major us indices as predictors (aside from non-stock ones like nasdaq volume)
+        http://finance.yahoo.com/indices?e=dow_jones
+
+Criteria: need these characteristics of asx sector index cfds:
+        1. System can predict them as well as stocks
+        2. Spread is low
+        3. Volume is high
+
+Also, index and sector cfds allow leverage of 1% !!!
+
+
+
+
+Typical spread
+        high spreads might be 1/400 = 0.25%
+        low spreads might be 1/10000 = 0.01%
+
+On 1million market value
+        2500
+        100
