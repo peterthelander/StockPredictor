@@ -1,1 +1,4 @@
-Use separate predictors for future bid/ask, instead of just one for mid. Advantage is it automatically understands spread when deciding position change, to avoid too much blippiness. Just change position when predicted future bid or ask is profitable. Not predicted values might cross, need to artificially uncross them.
+Use separate predictors for future bid/ask, instead of just one for mid. 
+Advantage is it automatically understands spread when deciding position change, to avoid too much blippiness. 
+Just change position when predicted future bid or ask is profitable. 
+Not predicted values might cross, need to artificially uncross them.
