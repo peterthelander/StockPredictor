@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <vector>
 #include <map>
 #include <filesystem>
 using namespace std;
@@ -29,10 +30,10 @@ const char* PATH_US_Data  = "C:\\Peter\\Pisa\\Data\\US_Data";
 const int numASXStocks = 69;
 const int numUSStocks = 813;
 
-const int NUM_DATES = 3856 * 5/4; // number of days from start end (inclusive), taking four week days per week
+const int NUM_DATES = 3856 * 5/4; // number of days from start to end (inclusive), taking four week days per week
 
-DateLong  US_DateGuide[NUM_DATES];
-DateLong ASX_DateGuide[NUM_DATES];
+vector<DateLong> US_DateGuide(NUM_DATES);
+vector<DateLong> ASX_DateGuide(NUM_DATES);
 
 //                        J   F   M   A   M   J   J   A   S   O   N   D;
 int daysInMonths[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -40,19 +41,19 @@ int daysInMonths[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 bool isLeap(int year)
 {
-	// data only covering ~ 1984 to 2002, so don't care about other centuries like 1900
+    // data only covering ~ 1984 to 2002, so don't care about other centuries like 1900
     return (year % 4 == 0);
 }
 
 void incrementDateLong(DateLong& d)
 {
-    int year = d/10000;
-    int month = (d%10000) / 100;
-    int day = (d%100);
+    int year = d / 10000;
+    int month = (d % 10000) / 100;
+    int day = (d % 100);
 
     day++;
 
-    int days = daysInMonths[month-1];
+    int days = daysInMonths[month - 1];
     if (month == 2 && isLeap(year))
         days = 29;
 
@@ -67,7 +68,7 @@ void incrementDateLong(DateLong& d)
         }
     }
 
-    d = (year * 100 + month)*100 + day;
+    d = (year * 100 + month) * 100 + day;
 }
 
 int US_index = 0;
@@ -75,33 +76,33 @@ int ASX_index = 0;
 
 void generateDateGuides()
 {
-    DateLong d = DATE_START; // first monday, for US stocks
+    DateLong d = DATE_START; // first Monday, for US stocks
 
     while (d < DATE_END)
     {
-        US_DateGuide[US_index++] = d; // take a monday
+        US_DateGuide[US_index++] = d; // take a Monday
         incrementDateLong(d);
-        US_DateGuide[US_index++] = d; // take a tuesday
-        ASX_DateGuide[ASX_index++] = d; // take a tuesday
+        US_DateGuide[US_index++] = d; // take a Tuesday
+        ASX_DateGuide[ASX_index++] = d; // take a Tuesday
         incrementDateLong(d);
-        US_DateGuide[US_index++] = d; // take a wednesday
-        ASX_DateGuide[ASX_index++] = d; // take a wednesday
+        US_DateGuide[US_index++] = d; // take a Wednesday
+        ASX_DateGuide[ASX_index++] = d; // take a Wednesday
         incrementDateLong(d);
-        US_DateGuide[US_index++] = d; // take a thursday
-        ASX_DateGuide[ASX_index++] = d; // take a thursday
+        US_DateGuide[US_index++] = d; // take a Thursday
+        ASX_DateGuide[ASX_index++] = d; // take a Thursday
         incrementDateLong(d);
-        US_DateGuide[US_index++] = d; // take a friday
-        ASX_DateGuide[ASX_index++] = d; // take a friday
-        incrementDateLong(d); // skip saturday
-        incrementDateLong(d); // skip sunday
-        incrementDateLong(d); // move to next monday
-        ASX_DateGuide[ASX_index++] = d; // take a monday
+        US_DateGuide[US_index++] = d; // take a Friday
+        ASX_DateGuide[ASX_index++] = d; // take a Friday
+        incrementDateLong(d); // skip Saturday
+        incrementDateLong(d); // skip Sunday
+        incrementDateLong(d); // move to next Monday
+        ASX_DateGuide[ASX_index++] = d; // take a Monday
     }
 }
 
 typedef float Daily;
 
-typedef Daily Stock[NUM_DATES];
+typedef vector<Daily> Stock;
 
 Daily undefined = 99999.0;
 
@@ -109,18 +110,18 @@ enum StockType { ASX, US };
 
 void loadDataStock(const char* stockName, Stock& stockData)
 {
-    FILE *fp = fopen(stockName, "rb");
+    FILE* fp = fopen(stockName, "rb");
     fread(&stockData[0], NUM_DATES, sizeof(Daily), fp);
     fclose(fp);
 }
 
 DateLong StrToDateLong(char* s)
 {
-    char *dash = strstr(s, "-");
+    char* dash = strstr(s, "-");
     char* p = dash + 1;
     *dash = 0;
 
-    char *dash2 = strstr(p, "-");
+    char* dash2 = strstr(p, "-");
     *dash2 = 0;
 
     int day = ::atol(s);
@@ -149,6 +150,8 @@ DateLong StrToDateLong(char* s)
 
 void loadStock(StockType stockType, const char* stockName, Stock& stockData)
 {
+    stockData.resize(NUM_DATES, undefined);
+
     if (strstr(stockName, ".DAT"))
     {
         loadDataStock(stockName, stockData);
@@ -157,23 +160,20 @@ void loadStock(StockType stockType, const char* stockName, Stock& stockData)
 
     const char* path;
     const char* ext;
-    DateLong* dateGuide;
+    vector<DateLong>* dateGuide;
 
     if (stockType == ASX)
     {
-        dateGuide = ASX_DateGuide;
+        dateGuide = &ASX_DateGuide;
         path = PATH_ASX_Text;
         ext = ".CSV";
     }
     else
     {
-        dateGuide = US_DateGuide;
+        dateGuide = &US_DateGuide;
         path = PATH_US_Text;
         ext = ".ASC";
     }
-
-    for (int i = 0; i < NUM_DATES; i++)
-        stockData[i] = undefined;
 
     string file;
 
@@ -216,8 +216,8 @@ void loadStock(StockType stockType, const char* stockName, Stock& stockData)
             char* open = strtok(0, delims);
             char* close = strtok(0, delims);
 
-            if (d > dateGuide[index]) continue;
-            while (d < dateGuide[index] && index > 0) index--;
+            if (d > (*dateGuide)[index]) continue;
+            while (d < (*dateGuide)[index] && index > 0) index--;
 
             if (index >= 0)
             {
@@ -232,7 +232,7 @@ void loadStock(StockType stockType, const char* stockName, Stock& stockData)
     }
 }
 
-void saveStock(Stock& stockData, const char* stockName)
+void saveStock(const Stock& stockData, const char* stockName)
 {
     FILE* fp = fopen(stockName, "wb");
     fwrite(&stockData[0], NUM_DATES, sizeof(Daily), fp);
@@ -273,9 +273,7 @@ void convertFiles(StockType stockType)
 int main()
 {
     generateDateGuides();
-
-    // Example: Convert US stocks
     convertFiles(US);
-
+    convertFiles(ASX);
     return 0;
 }
