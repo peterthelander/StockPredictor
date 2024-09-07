@@ -19,33 +19,30 @@ namespace fs = std::filesystem;
 
 typedef int DateLong;
 
-const DateLong DATE_START = 19840102; // Monday 02-Jan-1984
-const DateLong DATE_END   = 20020621; // Friday 21-Jun-2002
+constexpr DateLong DATE_START = 19840102; // Monday 02-Jan-1984
+constexpr DateLong DATE_END   = 20020621; // Friday 21-Jun-2002
 
-const char* PATH_ASX_Text = "C:\\Peter\\Pisa\\Data\\ASX_Text";
-const char* PATH_US_Text  = "C:\\Peter\\Pisa\\Data\\US_Text\\index";
-const char* PATH_ASX_Data = "C:\\Peter\\Pisa\\Data\\ASX_Data";
-const char* PATH_US_Data  = "C:\\Peter\\Pisa\\Data\\US_Data";
+constexpr const char* PATH_ASX_Text = "C:\\Peter\\Pisa\\Data\\ASX_Text";
+constexpr const char* PATH_US_Text  = "C:\\Peter\\Pisa\\Data\\US_Text\\index";
+constexpr const char* PATH_ASX_Data = "C:\\Peter\\Pisa\\Data\\ASX_Data";
+constexpr const char* PATH_US_Data  = "C:\\Peter\\Pisa\\Data\\US_Data";
 
-const int numASXStocks = 69;
-const int numUSStocks = 813;
+constexpr int numASXStocks = 69;
+constexpr int numUSStocks = 813;
 
-const int NUM_DATES = 3856 * 5/4; // number of days from start to end (inclusive), taking four week days per week
+constexpr int NUM_DATES = 3856 * 5/4; // number of days from start to end (inclusive), taking four weekdays per week
 
 vector<DateLong> US_DateGuide(NUM_DATES);
 vector<DateLong> ASX_DateGuide(NUM_DATES);
 
-//                        J   F   M   A   M   J   J   A   S   O   N   D;
-int daysInMonths[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+constexpr int daysInMonths[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-
-bool isLeap(int year)
+constexpr bool isLeap(int year)
 {
-    // data only covering ~ 1984 to 2002, so don't care about other centuries like 1900
-    return (year % 4 == 0);
+    return (year % 4 == 0); // simplified leap year calculation since we only care about the 20th century
 }
 
-void incrementDateLong(DateLong& d)
+constexpr void incrementDateLong(DateLong& d)
 {
     int year = d / 10000;
     int month = (d % 10000) / 100;
@@ -104,7 +101,7 @@ typedef float Daily;
 
 typedef vector<Daily> Stock;
 
-Daily undefined = 99999.0;
+constexpr Daily undefined = 99999.0f;
 
 enum StockType { ASX, US };
 
@@ -115,9 +112,9 @@ void loadDataStock(const char* stockName, Stock& stockData)
     fclose(fp);
 }
 
-DateLong StrToDateLong(char* s)
+DateLong StrToDateLong(const char* s) // Not constexpr anymore due to string processing functions
 {
-    char* dash = strstr(s, "-");
+    char* dash = strstr(const_cast<char*>(s), "-");
     char* p = dash + 1;
     *dash = 0;
 
@@ -256,15 +253,13 @@ void convertFiles(StockType stockType)
     // Use C++17 filesystem to replace dirent.h
     for (const auto& entry : fs::directory_iterator(root))
     {
-        if (entry.is_regular_file())
+        const auto& path = entry.path();
+        if (path.extension() == ".CSV" || path.extension() == ".ASC")
         {
-            cout << "File: " << entry.path().filename().string() << endl;
-            string path2 = root + "\\" + entry.path().filename().string();
-            // Load and save stock data
             Stock stockData;
-            loadStock(stockType, entry.path().filename().string().c_str(), stockData);
+            loadStock(stockType, path.filename().string().c_str(), stockData);
 
-            string outFile = outPath + "\\" + entry.path().filename().replace_extension(".DAT").string();
+            auto outFile = path.filename().replace_extension(".DAT").string();
             saveStock(stockData, outFile.c_str());
         }
     }
