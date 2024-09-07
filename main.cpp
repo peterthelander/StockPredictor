@@ -8,8 +8,6 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-#pragma warning(disable:4786)
-
 /*
         US data goes: 1-Jan-1968  ... 30-sep-2002
         ASX data goes: Tue 3-Jan-1984 ... 26-Jun-2002
